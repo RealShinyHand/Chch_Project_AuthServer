@@ -3,6 +3,7 @@ package com.chch.skj.auth_server.auth;
 import org.springframework.stereotype.Service;
 
 import com.chch.skj.auth_server.auth.dto.JWTPair;
+import com.chch.skj.auth_server.auth.dto.UserDO;
 import com.chch.skj.auth_server.auth.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class AuthServiceImple implements AuthService{
 	private final AuthRepository autoRepo = null;
 	
 	@Override
-	public JWTPair Login(String userId, String password) throws UserNotFoundException {
+	public JWTPair login(String userId, String password) throws UserNotFoundException {
 		
 		String authToken = "";
 		String refreshToken = "";
@@ -23,11 +24,18 @@ public class AuthServiceImple implements AuthService{
 		
 		
 		
-		
 		var resultVo = new JWTPair(authToken, refreshToken,result);
 		
 		
 		return resultVo;
+	}
+
+	@Override
+	public UserDO isValid(String authToken) {
+		
+		//authJWTUtil.
+		
+		return null;
 	}
 
 }
