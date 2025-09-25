@@ -1,10 +1,13 @@
 package com.chch.skj.auth_server.auth;
 
+
 import org.springframework.stereotype.Service;
 
 import com.chch.skj.auth_server.auth.dto.JWTPair;
+import com.chch.skj.auth_server.auth.dto.Role;
 import com.chch.skj.auth_server.auth.dto.UserDO;
-import com.chch.skj.auth_server.auth.exception.UserNotFoundException;
+import com.chch.skj.auth_server.auth.dto.UserDto;
+import com.chch.skj.auth_server.auth.exception.UserVerificationFailException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,22 +15,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthServiceImple implements AuthService{
 
-	private final AuthJWTUtil authJWTUtil = null;
-	private final AuthRepository autoRepo = null;
+	private final AuthJWTUtil authJWTUtil ;
+	private final AuthDao autoDao ;
 	
 	@Override
-	public JWTPair login(String userId, String password) throws UserNotFoundException {
+	public JWTPair login(String userId, String password) throws UserVerificationFailException {
 		
-		String authToken = "";
-		String refreshToken = "";
-		boolean result = false;
-		
-		
-		
-		var resultVo = new JWTPair(authToken, refreshToken,result);
+		var a = new UserDto();
+		a.
+		autoDao.selectUser(userId,password);
 		
 		
-		return resultVo;
+		
+		var jwtPair = authJWTUtil.CreateToken(userId, userId,Role.Basic);
+				
+		return jwtPair;
 	}
 
 	@Override
