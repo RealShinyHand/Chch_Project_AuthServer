@@ -1,0 +1,20 @@
+package com.chch.skj.auth_server.auth;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.chch.skj.auth_server.auth.exception.UserVerificationFailException;
+
+@RestControllerAdvice
+public class AuthControllerAdvice {
+
+
+	@ExceptionHandler(exception = UserVerificationFailException.class)
+	public ResponseEntity<?> handleUserVerificationFail(UserVerificationFailException e){
+		
+		return new ResponseEntity<>(,HttpStatus.UNAUTHORIZED);
+	}
+	
+}

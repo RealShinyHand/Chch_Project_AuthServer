@@ -8,5 +8,5 @@ public interface AuthService {
 
 	JWTPair login(String userId,String password)throws UserVerificationFailException; 
 	
-	UserDO isValid(String authToken);
+	UserDO isValid(String authToken) throws UserVerificationFailException;
 }

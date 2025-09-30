@@ -1,11 +1,16 @@
 package com.chch.skj.auth_server.auth;
 
 import java.time.LocalDateTime;
-
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
+import org.springframework.aop.ThrowsAdvice;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,11 +28,11 @@ import com.chch.skj.auth_server.auth.dto.UserDO;
 @Component
 public class AuthJWTUtil {
 
-	@Value(value = "auth.jwt.key1")
-	private String key1 = "";
+	@Value(value = "${auth.jwt.key1}")
+	private String key1Str ;
 
-	@Value(value = "auth.jwt.key2")
-	private String key2 = "";
+	@Value(value = "${auth.jwt.key2}")
+	private String key2Str ;
 	
 	
 	
@@ -38,10 +43,11 @@ public class AuthJWTUtil {
 		
 		Map<String,Object> headerMap = new HashMap<>();
 		Map<String,Object> payLoadMap = new HashMap<>();
+
 		
 		payLoadMap.put(Claims.AUDIENCE, role);
 
-		payLoadMap.put(Claims.EXPIRATION, now.plusHours(1));
+		payLoadMap.put(Claims.EXPIRATION, Long.toString(now.plusHours(1).toEpochSecond(ZoneOffset.ofHours(9))));
 
 		payLoadMap.put(Claims.ID, userUID);
 
@@ -51,14 +57,14 @@ public class AuthJWTUtil {
 
 		payLoadMap.put(Claims.SUBJECT, "auth");
 
-		payLoadMap.put(Claims.NOT_BEFORE, now );
+		payLoadMap.put(Claims.NOT_BEFORE, Long.toString(now.toEpochSecond(ZoneOffset.ofHours(9))) );
 		
 		payLoadMap.put("role", role);
 		
 		payLoadMap.put("userID", userID);
 		
 		
-		var key  = Keys.hmacShaKeyFor(key1.getBytes());
+		SecretKey key  = Keys.hmacShaKeyFor(key1Str.getBytes());
 		
 		String autToken = Jwts.builder()
 		.setHeader(headerMap)
@@ -69,7 +75,7 @@ public class AuthJWTUtil {
 		
 		payLoadMap.put(Claims.SUBJECT, "refresh");
 		
-		var key2  = Keys.hmacShaKeyFor(key1.getBytes());
+		SecretKey key2  = Keys.hmacShaKeyFor(key2Str.getBytes());
 		
 		
 		String refreshToken = Jwts.builder()
@@ -85,8 +91,28 @@ public class AuthJWTUtil {
 		return jwtPair;
 	}
 	
-	public UserDO isValid(String authToken) {
+	public UserDO isValid(String authToken) throws Exception{
 		
-		return null;
+
+		SecretKey key1  = Keys.hmacShaKeyFor(key2Str.getBytes());
+		
+		try {
+			var jwt =  Jwts.parserBuilder().setSigningKey(key1).build().parse(authToken);
+
+			Claims claims = (Claims) jwt.getBody();
+			String userID = claims.get("userID").toString();
+			String userUID = claims.get(Claims.ID).toString();
+			String roleString = claims.get("role").toString();
+			
+			var role = Role.valueOf(roleString);
+			
+			var userDO = new UserDO(userID,userUID,"",role);
+			
+			return userDO;	
+			
+		}catch (Exception e) {
+			throw e;
+		}
+
 	}
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chch.skj.auth_server.auth.dto.JWTPair;
+import com.chch.skj.auth_server.auth.dto.UserDO;
 import com.chch.skj.auth_server.auth.exception.UserVerificationFailException;
 
 import jakarta.servlet.http.Cookie;
@@ -38,7 +39,7 @@ public class AuthController {
 	}
 	
 	@PostMapping(path="/login")
-	public ResponseEntity<?> Login(@RequestBody Map<String,String> map){
+	public ResponseEntity<?> Login(@RequestBody Map<String,String> map,HttpServletResponse response){
 		
 		
 		String id = map.get("userId");
@@ -53,6 +54,22 @@ public class AuthController {
 		JWTPair temp;
 		try {
 			temp = authService.login(id, password);
+			
+			var cookie =  new Cookie("authToken",String.format("%s", temp.authToken()));
+			cookie.setPath("/");
+			cookie.setMaxAge(60*30);//30분
+			cookie.setSecure(true);
+			
+			response.addCookie(cookie);
+			
+			
+			cookie =  new Cookie("refreshToken",String.format("%s", temp.refreshToken()));
+			cookie.setMaxAge(60*60*24);//하루
+			cookie.setSecure(true);
+			
+			response.addCookie(cookie);
+			
+			
 			return new ResponseEntity<JWTPair>(temp,HttpStatus.OK);
 		} catch (UserVerificationFailException e) {
 			return	new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
@@ -62,27 +79,68 @@ public class AuthController {
 	}
 	
 	@GetMapping(path = "/valid")
-	public ResponseEntity<?> Valid(HttpServletRequest request, HttpServletResponse response){
+	public ResponseEntity<?> Valid(HttpServletRequest request, HttpServletResponse response) throws UserVerificationFailException{
 		
-		request.getHeader(null);
+		
+		String authToken = "";
+		String refreshToken = "";
+		
 		
 		for(var cookie : request.getCookies()) {
-			String k = cookie.getAttribute("authToken");
+			String cookieName = cookie.getName();
+			if(cookieName==null || cookieName == "") {
+				cookieName = cookie.getName();
+			}
+			
+			if(cookieName == null || cookieName == "") {
+				
+				
+			}else if("authToken".equals(cookieName) && "".equals(authToken)){
+				
+				authToken = cookie.getValue();
+				
+			}else if("refreshToken".equals(cookieName)) {
+				refreshToken = cookie.getValue();
+			}
 		}
 		
-		authService.isValid(null);
 		
+		boolean isAuthenticated = false;
+		UserDO userDo  = null;		
+		if(authToken != "") {
+			int splitIndex = authToken.indexOf(" ");
+			if(splitIndex != -1) {
+				String tokenUsage = authToken.substring(0,splitIndex);
+				String token = authToken.substring(splitIndex,authToken.length());
+				
+			    userDo = authService.isValid(authToken);	
+			    
+				if(userDo == null) {
+					isAuthenticated = false;
+				}else {
+					isAuthenticated = true;
+				}
+			}
+		}
+
+		//나중에 구현
+		if(!isAuthenticated) {
+			if(refreshToken != "") {
+				userDo = authService.isValid(refreshToken);	
+			
+				if(userDo != null) {
+					
+		//			authService.login(userDo.userName(), userDo.)
+				}
+			}
+				
+		}
 		
-		var cookie =  new Cookie("authToken","");
-		cookie.setSecure(true);
+		{//여기는 그냥 성공한거
+			
+			
+		}
 		
-		response.addCookie(cookie);
-		
-		
-		cookie =  new Cookie("refreshToken","");
-		cookie.setSecure(true);
-		
-		response.addCookie(cookie);
 		
 		return null;
 	}

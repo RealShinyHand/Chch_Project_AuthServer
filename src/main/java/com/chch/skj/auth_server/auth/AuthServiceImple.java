@@ -8,6 +8,7 @@ import com.chch.skj.auth_server.auth.dto.Role;
 import com.chch.skj.auth_server.auth.dto.UserDO;
 import com.chch.skj.auth_server.auth.dto.UserDto;
 import com.chch.skj.auth_server.auth.exception.UserVerificationFailException;
+import com.chch.skj.auth_server.mapper.MemberDao;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,14 +17,14 @@ import lombok.RequiredArgsConstructor;
 public class AuthServiceImple implements AuthService{
 
 	private final AuthJWTUtil authJWTUtil ;
-	private final AuthDao autoDao ;
+	private final MemberDao memberDao ;
 	
 	@Override
 	public JWTPair login(String userId, String password) throws UserVerificationFailException {
 		
 		var a = new UserDto();
-		a.
-		autoDao.selectUser(userId,password);
+		
+		UserDto dto = memberDao.selectUserUserIdAndPassword(userId,password);
 		
 		
 		
@@ -33,11 +34,19 @@ public class AuthServiceImple implements AuthService{
 	}
 
 	@Override
-	public UserDO isValid(String authToken) {
+	public UserDO isValid(String authToken) throws UserVerificationFailException{
 		
-		//authJWTUtil.
-		
-		return null;
+		try {
+			var userDO = authJWTUtil.isValid(authToken);
+
+			
+			
+			return userDO;		
+			
+		}catch (Exception e) {
+			
+			throw new UserVerificationFailException("User JTW Verification Fail");
+		}
 	}
 
 }

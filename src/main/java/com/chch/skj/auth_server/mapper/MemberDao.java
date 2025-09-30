@@ -1,6 +1,7 @@
 package com.chch.skj.auth_server.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.chch.skj.auth_server.auth.dto.UserDto;
 
@@ -8,5 +9,5 @@ import com.chch.skj.auth_server.auth.dto.UserDto;
 public interface MemberDao {
 	
 	
-	public UserDto selectUserUserIdAndPassword(String userId,String passWord);
+	public UserDto selectUserUserIdAndPassword(@Param("userId") String userId, @ Param("passWord") String passWord);
 }
