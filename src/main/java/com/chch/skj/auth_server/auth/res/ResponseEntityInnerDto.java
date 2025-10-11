@@ -1,4 +1,4 @@
-package com.chch.skj.auth_server.auth.dto;
+package com.chch.skj.auth_server.auth.res;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseEntityInnerDto<T extends Object> {
-
 	private T data = null;
 	private List<String> details = null;
 	

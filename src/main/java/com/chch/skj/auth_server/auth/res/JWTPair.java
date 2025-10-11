@@ -1,4 +1,4 @@
-package com.chch.skj.auth_server.auth.dto;
+package com.chch.skj.auth_server.auth.res;
 
 public record JWTPair(String authToken,String refreshToken) {
 

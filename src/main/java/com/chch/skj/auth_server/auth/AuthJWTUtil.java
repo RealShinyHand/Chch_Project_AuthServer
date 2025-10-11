@@ -1,29 +1,23 @@
 package com.chch.skj.auth_server.auth;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
 
-import org.springframework.aop.ThrowsAdvice;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Header;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
-import com.chch.skj.auth_server.auth.dto.JWTPair;
+import com.chch.skj.auth_server.auth.res.JWTPair;
 import com.chch.skj.auth_server.auth.dto.Role;
-import com.chch.skj.auth_server.auth.dto.UserDO;
+import com.chch.skj.auth_server.auth.res.UserRes;
 
 @Component
 public class AuthJWTUtil {
@@ -65,7 +59,7 @@ public class AuthJWTUtil {
 		
 		
 		SecretKey key  = Keys.hmacShaKeyFor(key1Str.getBytes());
-		
+
 		String autToken = Jwts.builder()
 		.setHeader(headerMap)
 		.setClaims(payLoadMap)
@@ -91,10 +85,10 @@ public class AuthJWTUtil {
 		return jwtPair;
 	}
 	
-	public UserDO isValid(String authToken) throws Exception{
+	public UserRes isValid(String authToken) throws Exception{
 		
 
-		SecretKey key1  = Keys.hmacShaKeyFor(key2Str.getBytes());
+		SecretKey key1  = Keys.hmacShaKeyFor(key1Str.getBytes());
 		
 		try {
 			var jwt =  Jwts.parserBuilder().setSigningKey(key1).build().parse(authToken);
@@ -106,7 +100,7 @@ public class AuthJWTUtil {
 			
 			var role = Role.valueOf(roleString);
 			
-			var userDO = new UserDO(userID,userUID,"",role);
+			var userDO = new UserRes(userID,userUID,role);
 			
 			return userDO;	
 			
